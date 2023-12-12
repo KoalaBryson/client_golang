@@ -180,7 +180,12 @@ func HandlerForTransactional(reg prometheus.TransactionalGatherer, opts HandlerO
 			w = gz
 		}
 
-		enc := expfmt.NewEncoder(w, contentType)
+		var enc expfmt.Encoder
+		if opts.EnableOpenMetricsCreatedLines {
+			enc = expfmt.NewEncoder(w, contentType, expfmt.WithCreatedLines())
+		} else {
+			enc = expfmt.NewEncoder(w, contentType)
+		}
 
 		// handleError handles the error according to opts.ErrorHandling
 		// and returns true if we have to abort after the handling.
@@ -371,6 +376,8 @@ type HandlerOpts struct {
 	// (which changes the identity of the resulting series on the Prometheus
 	// server).
 	EnableOpenMetrics bool
+	// TODO: document this properly
+	EnableOpenMetricsCreatedLines bool
 	// ProcessStartTime allows setting process start timevalue that will be exposed
 	// with "Process-Start-Time-Unix" response header along with the metrics
 	// payload. This allow callers to have efficient transformations to cumulative
